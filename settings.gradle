@@ -1,0 +1,3 @@
+include ':ima_adapter'
+include ':app'
+rootProject.name = "HuaweiImaAdapter"
