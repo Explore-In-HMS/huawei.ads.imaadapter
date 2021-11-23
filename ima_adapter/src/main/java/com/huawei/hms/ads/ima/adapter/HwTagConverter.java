@@ -27,17 +27,15 @@ import java.util.Set;
 public class HwTagConverter {
 
     private static HwTagConverter instance;
-    private final static String TAG = "HwImaPluginLatest";
-
+    private static final String TAG = "HwImaAdapter";
 
     private Uri googleAdTag;
     private TagConverterListener listener;
 
-
     private String adUnitID;
     private GoogleAds googleAds = new GoogleAds();
     private LinearAdSlot mLinearAdSlot;
-    private final String mimeType = "application/xml";
+    private static final String mimeType = "application/xml";
 
 
     public static void init(@NonNull String TagUrl, @NonNull String adUnitId, TagConverterListener tagConverterListener) {
@@ -57,41 +55,38 @@ public class HwTagConverter {
     }
 
     private void analyseGoogleAds() {
-
         try {
             Set<String> args = instance.googleAdTag.getQueryParameterNames();
 
-            googleAds.adUri = instance.googleAdTag;
+            googleAds.setAdUri(instance.googleAdTag);
 
             if (args.contains(AdTagURLVariables.output)) {
-                googleAds.xmlOutputType = instance.googleAdTag.getQueryParameter(AdTagURLVariables.output);
+                googleAds.setXmlOutputType(instance.googleAdTag.getQueryParameter(AdTagURLVariables.output));
             }
             if (args.contains(AdTagURLVariables.vPos)) {
-                googleAds.adPosition = instance.googleAdTag.getQueryParameter(AdTagURLVariables.vPos);
+                googleAds.setAdPosition(instance.googleAdTag.getQueryParameter(AdTagURLVariables.vPos));
             }
             if (args.contains(AdTagURLVariables.vAdType)) {
-                googleAds.adType = instance.googleAdTag.getQueryParameter(AdTagURLVariables.vAdType);
+                googleAds.setAdType(instance.googleAdTag.getQueryParameter(AdTagURLVariables.vAdType));
             }
             if (args.contains(AdTagURLVariables.maxAdDuration)) {
-                googleAds.maxAdDuration = Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.maxAdDuration));
+                googleAds.setMaxAdDuration(Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.maxAdDuration)));
             }
             if (args.contains(AdTagURLVariables.minAdDuration)) {
-                googleAds.minAdDuration = Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.minAdDuration));
+                googleAds.setMinAdDuration(Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.minAdDuration)));
             }
             if (args.contains(AdTagURLVariables.size)) {
-                try {
-                    String[] whAdSlot = instance.googleAdTag.getQueryParameter(AdTagURLVariables.size).split("x");
-                    googleAds.width = Integer.parseInt(whAdSlot[0]);
-                    googleAds.height = Integer.parseInt(whAdSlot[1]);
-                } catch (Exception e) {
-                    Log.e(TAG, "Ad URL: Slot size parse failed");
+                String[] whAdSlot = instance.googleAdTag.getQueryParameter(AdTagURLVariables.size).split("x");
+                if (whAdSlot.length > 0) {
+                    googleAds.setWidth(Integer.parseInt(whAdSlot[0]));
+                    googleAds.setHeight(Integer.parseInt(whAdSlot[1]));
                 }
             }
             if (args.contains(AdTagURLVariables.npa)) {
-                googleAds.npaStatus = Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.npa));
+                googleAds.setNpaStatus(Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.npa)));
             }
             if (args.contains(AdTagURLVariables.tfcd)) {
-                googleAds.tcfdStatus = Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.tfcd));
+                googleAds.setTcfdStatus(Integer.parseInt(instance.googleAdTag.getQueryParameter(AdTagURLVariables.tfcd)));
             }
         } catch (Exception e) {
             Log.i(TAG, e.toString());
@@ -105,14 +100,14 @@ public class HwTagConverter {
 
     private void requestVastSDK() {
 
-        if (googleAds.xmlOutputType.equals("vmap")) {
+        if (googleAds.getXmlOutputType().equals(AdTagURLVariables.vmap)) {
             List<GoogleAds> vmapAds = VastXMLCreator.getGoogleAdsFromVMAP(googleAds);
 
             if (vmapAds != null) {
                 makeRequestForMultipleAd(vmapAds, googleAds);
             }
 
-        } else if (googleAds.xmlOutputType.equals("vast")) {
+        } else if (googleAds.getXmlOutputType().equals(AdTagURLVariables.vast)) {
             configureVastRequest(googleAds);
             makeRequestForSingleAd(googleAds);
         }
@@ -129,16 +124,12 @@ public class HwTagConverter {
                     TagRequestHandler handler = new TagRequestHandler();
 
                     for (LinearCreative creative : linearAds) {
-
-                        if (creative.skipDuration != 0) {
+                        if (creative.skipDuration != 0 && !handler.checkGoogleHasOffset(ad)) {
                             //check google ad contain offset
-                            if (!handler.checkGoogleHasOffset(ad)) {
-                                creative.skipDuration = -1;
-                            }
+                            creative.skipDuration = -1;
                         }
 
                         String vXML = VastXMLCreator.create(creative, false);
-
                         Uri uri = Uri.parse("data:" + mimeType + ";base64," + Base64.encodeToString(vXML.getBytes(), Base64.NO_WRAP));
 
                         if (uri != null) {
@@ -179,24 +170,18 @@ public class HwTagConverter {
 
 
                         for (LinearCreative creative : linearAds) {
-                            if (creative.skipDuration != 0) {
-                                if (!handler.checkGoogleHasOffset(vmapAd)) {
-                                    creative.skipDuration = -1;
-                                }
+                            if (creative.skipDuration != 0 && !handler.checkGoogleHasOffset(vmapAd)) {
+                                creative.skipDuration = -1;
                             }
                             String vXML = VastXMLCreator.create(creative, true);
                             hwAdXMLs.add(vXML);
                         }
-
-
                     } else {
                         hwAdXMLs.add("");
                     }
 
                     if (hwAdXMLs.size() == ads.size()) {
-
-                        updateTagsForVmap(hwAdXMLs, ads, vmapAdTagUrlInfo);
-
+                        updateTagsForVmap(hwAdXMLs, ads);
                     }
                 }
 
@@ -205,7 +190,7 @@ public class HwTagConverter {
                     hwAdXMLs.add("");
 
                     if (hwAdXMLs.size() == ads.size()) {
-                        updateTagsForVmap(hwAdXMLs, ads, vmapAdTagUrlInfo);
+                        updateTagsForVmap(hwAdXMLs, ads);
 
                     }
                     Log.e(TAG, "failed");
@@ -216,14 +201,14 @@ public class HwTagConverter {
 
     private void configureVastRequest(GoogleAds ads) {
 
-        ads = checkParameterValues(ads);
+        GoogleAds checkedAd = checkParameterValues(ads);
 
-        if (ads.maxAdDuration / 1000 > 1) {
-            ads.maxAdDuration = ads.maxAdDuration / 1000;
+        if (checkedAd.getMaxAdDuration() / 1000 > 1) {
+            checkedAd.setMaxAdDuration(checkedAd.getMaxAdDuration() / 1000);
         }
-        Log.i(TAG, "height: " + ads.height);
-        Log.i(TAG, "width: " + ads.width);
-        Log.i(TAG, "maxAdDuration: " + ads.maxAdDuration);
+        Log.i(TAG, "height: " + checkedAd.getHeight());
+        Log.i(TAG, "width: " + checkedAd.getWidth());
+        Log.i(TAG, "maxAdDuration: " + checkedAd.getMaxAdDuration());
 
         CreativeMatchStrategy creativeMatchStrategy =
                 new CreativeMatchStrategy(CreativeMatchStrategy.CreativeMatchType.ANY);
@@ -232,36 +217,34 @@ public class HwTagConverter {
                 .setNonPersonalizedAd(0)
                 .setConsent("")
                 .setAdContentClassification("A")
-                .setTagForChildProtection(ads.tcfdStatus)
+                .setTagForChildProtection(checkedAd.getTcfdStatus())
                 .setTagForUnderAgeOfPromise(-1)
                 .build();
 
         mLinearAdSlot = new LinearAdSlot();
         mLinearAdSlot.setSlotId(this.adUnitID);
-        mLinearAdSlot.setTotalDuration(ads.maxAdDuration);
+        mLinearAdSlot.setTotalDuration(checkedAd.getMaxAdDuration());
         mLinearAdSlot.setCreativeMatchStrategy(creativeMatchStrategy);
         mLinearAdSlot.setAllowMobileTraffic(true);
         mLinearAdSlot.setOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         mLinearAdSlot.setRequestOptions(requestOptions);
-        mLinearAdSlot.setSize(ads.width, ads.height);
+        mLinearAdSlot.setSize(checkedAd.getWidth(), checkedAd.getHeight());
     }
 
     private GoogleAds checkParameterValues(GoogleAds ad) {
-        if (ad.height == 0) {
-            ad.height = 640;
-        }
-        if (ad.width == 0) {
-            ad.width = 360;
-        }
-        if (ad.maxAdDuration == 0) {
-            ad.maxAdDuration = 20;
-        }
-        if (ad.tcfdStatus == 0)
-            ad.tcfdStatus = -1;
+        if (ad.getHeight() == 0)
+            ad.setHeight(640);
+        if (ad.getWidth() == 0)
+            ad.setWidth(360);
+        if (ad.getMaxAdDuration() == 0)
+            ad.setMaxAdDuration(20);
+        if (ad.getTcfdStatus() == 0)
+            ad.setTcfdStatus(-1);
         return ad;
+
     }
 
-    private void updateTagsForVmap(List<String> hwAdXMLs, List<GoogleAds> ads, GoogleAds vmapAdTagUrlInfo) {
+    private void updateTagsForVmap(List<String> hwAdXMLs, List<GoogleAds> ads) {
 
         for (int i = 0; i < ads.size(); i++) {
             /**
@@ -273,7 +256,6 @@ public class HwTagConverter {
                 hwAdXMLs.add(i, TagRequestHandler.getResponseXML(googleBackupAd));
             }
         }
-
         String vXML = VastXMLCreator.setVastToVmap(hwAdXMLs, ads);
         Uri uri = Uri.parse("data:" + mimeType + ";base64," + Base64.encodeToString(vXML.getBytes(), Base64.NO_WRAP));
 

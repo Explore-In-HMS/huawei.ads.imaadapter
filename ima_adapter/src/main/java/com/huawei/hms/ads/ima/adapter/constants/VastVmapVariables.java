@@ -2,7 +2,10 @@ package com.huawei.hms.ads.ima.adapter.constants;
 
 public class VastVmapVariables {
 
-    public static String hw_vast =
+    private VastVmapVariables() {
+    }
+
+    public static final String hwVast =
             "<VAST xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"3.0\">" +
                     "<Ad id=\"\"> <InLine> <AdSystem></AdSystem> <AdTitle></AdTitle> " +
                     "<Description></Description> " +
@@ -54,28 +57,57 @@ public class VastVmapVariables {
                     "</InLine> </Ad>" +
                     " </VAST>";
 
-
-    public static String hw_vmap =
+    public static final String hwVmap =
             "<vmap:VMAP xmlns:vmap=\"http://www.iab.net/videosuite/vmap\" version=\"1.0\">" +
                     "<vmap:AdBreak timeOffset=\"start\" breakType=\"linear\" breakId=\"preroll\">" +
                     "<vmap:AdSource id=\"preroll-ad-1\" allowMultipleAds=\"false\" followRedirects=\"true\">" +
                     "<vmap:VASTAdData>" +
-                    hw_vast +
+                    hwVast +
                     "</vmap:VASTAdData>" +
                     "</vmap:AdSource>" +
                     "</vmap:AdBreak>" +
                     "</vmap:VMAP>";
 
-    public static String hw_vmap_dynamic =
+    public static final String hwVmapDynamic =
             "<vmap:VMAP version=\"1.0\">" +
-
                     "</vmap:VMAP>";
 
-    public static String hw_vmap_dynamic_element =
+    public static final String hwVmapDynamicElement =
             "<vmap:AdBreak timeOffset=\"\" breakType=\"\" breakId=\"\">" +
                     "<vmap:AdSource id=\"\" allowMultipleAds=\"\" followRedirects=\"\">" +
                     "<vmap:VASTAdData>" +
                     "</vmap:VASTAdData>" +
                     "</vmap:AdSource>" +
                     "</vmap:AdBreak>";
+
+    public static final String ad = "Ad";
+    public static final String error = "Error";
+    public static final String impression = "Impression";
+    public static final String linear = "Linear";
+    public static final String duration = "Duration";
+    public static final String tracking = "Tracking";
+    public static final String trackingEvents = "TrackingEvents";
+    public static final String clickThrough = "ClickThrough";
+    public static final String clickTracking = "ClickTracking";
+    public static final String mediaFile = "MediaFile";
+    public static final String icon = "Icon";
+    public static final String staticResource = "StaticResource";
+    public static final String iconClickThrough = "IconClickThrough";
+    public static final String id = "id";
+    public static final String skipOffset = "skipoffset";
+    public static final String event = "event";
+    public static final String delivery = "delivery";
+    public static final String type = "type";
+    public static final String width = "width";
+    public static final String height = "height";
+    public static final String xPosition = "xPosition";
+    public static final String yPosition = "yPosition";
+    public static final String breakId = "breakId";
+    public static final String breakType = "breakType";
+    public static final String timeOffset = "timeOffset";
+    public static final String linearS = "linear";
+    public static final String vmapAdBreak = "vmap:AdBreak";
+    public static final String vmapAdTagURI = "vmap:AdTagURI";
+    public static final String vmapVmap = "vmap:VMAP";
+    public static final String vmapVastAdData = "vmap:VASTAdData";
 }
