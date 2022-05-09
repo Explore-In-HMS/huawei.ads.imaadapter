@@ -1,6 +1,6 @@
  <h1 align="center">Huawei-Ima Adapter Github Documentation</h3>
 
- ![Latest Version](https://img.shields.io/badge/latestVersion-1.1.beta-yellow) ![Kotlin](https://img.shields.io/badge/language-java-blue)
+ ![Latest Version](https://img.shields.io/badge/latestVersion-1.0&hyphen;beta.1-yellow) ![Kotlin](https://img.shields.io/badge/language-java-blue)
 <br>
 ![Supported Platforms](https://img.shields.io/badge/Supported_Platforms:-Native_Android_-orange)
 
@@ -83,7 +83,7 @@ In the app-level build.gradle, include Huawei Ads dependency (required by the ad
 ```groovy
 dependencies {
     ...
-    'com.github.Explore-In-HMS:huawei.ads.imaadapter:<latest_version>'
+    implementation 'com.github.Explore-In-HMS:huawei.ads.imaadapter:<latest_version>'
 }
 ```
 
