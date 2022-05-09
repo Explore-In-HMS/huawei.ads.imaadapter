@@ -89,7 +89,7 @@ dependencies {
 
 # Version Change History
 
-## 1.1-beta
+## 1.0-beta.1
 
 ## 1.0-beta
 
